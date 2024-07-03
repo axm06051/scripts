@@ -1,0 +1,44 @@
+<#
+.SYNOPSIS
+Script to capture input from an srt source, process for a limited time, and save to a timestamped file.
+
+.DESCRIPTION
+This script sets up TSDuck to capture input from an srt source on a specified port for a given duration.
+It saves the captured data to a timestamped file for analysis.
+
+.PARAMETER Port
+The port number on which the script listens for input. Default is 9999.
+
+.PARAMETER TimeLimitInSeconds
+The duration in seconds for which the script captures input. Default is 10 seconds.
+
+.PARAMETER OutputDirectory
+Optional parameter to specify the directory where the output file should be saved.
+
+.EXAMPLE
+.\Capture-SRT.ps1 -Port 9999 -TimeLimitInSeconds 10 -OutputDirectory "C:\Output"
+
+#>
+
+param(
+    [int]$Port = 9999,
+    [int]$TimeLimitInSeconds = 10,
+    [string]$OutputDirectory
+)
+
+try {
+    $timestamp = Get-Date -Format "yyyy-MM-dd_HH-mm-ss"
+    $fileName = "KRK_PC_LAB_SRT_$timestamp.ts"
+    
+    Write-Host "Starting $inputName input listener on port $Port for $TimeLimitInSeconds seconds.`nWriting to $fileName`n" -ForegroundColor Cyan
+
+    tsp -I "srt" --listener $Port `
+    -P until --seconds $TimeLimitInSeconds `
+    -P analyze -O file "$fileName" `
+    -P pcrverify
+
+    Write-Host "Capture complete. Output saved to: $fileName" -ForegroundColor Green
+}
+catch {
+    Write-Host "Error occurred: $_" -ForegroundColor Red
+}
